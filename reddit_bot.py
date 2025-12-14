@@ -22,7 +22,7 @@ from config import (
     MAX_COMMENTS_PER_SESSION,
     MAX_REPLY_PER_POST,
 )
-from response_templates import get_destination_specific_response, GENERIC_RESPONSES
+from response_templates import get_destination_specific_response, GENERIC_RESPONSES, load_context_from_file
 from advanced_config import ENGAGEMENT_STRATEGY, RESPONSE_SETTINGS, CONTENT_MODERATION, ACTIVITY_SCHEDULE, TRACKING_SETTINGS
 
 # Configuring logging
@@ -128,10 +128,47 @@ def contains_target_keywords(comment_body):
             return True
     return False
 
+def get_context_for_subreddit(subreddit_name):
+    """
+    Get specific context based on the subreddit.
+    """
+    context_map = {
+        'JapanTravel': 'context/japan_context.md',
+        'Tokyo': 'context/japan_context.md',
+        'japan': 'context/japan_context.md',
+        'EuropeTravelTips': 'context/europe_context.md',
+        'europe': 'context/europe_context.md',
+        'Paris': 'context/europe_context.md',
+        'travel': 'context/travel_journal_context.md',
+        'solotravel': 'context/travel_journal_context.md',
+        'travel_tips': 'context/travel_journal_context.md',
+        'TravelHacks': 'context/travel_journal_context.md',
+        'backpacking': 'context/travel_journal_context.md',
+        'digitalnomad': 'context/travel_journal_context.md',
+        'ThailandTourism': 'context/travel_journal_context.md',
+        'bali': 'context/travel_journal_context.md',
+        'VisitingIceland': 'context/travel_journal_context.md',
+        'italianlearning': 'context/europe_context.md'
+    }
+
+    context_file = context_map.get(subreddit_name.lower())
+    if context_file:
+        context = load_context_from_file(context_file)
+        if context:
+            return context
+
+    # Default context if no specific context found
+    default_context = load_context_from_file('context/travel_journal_context.md')
+    return default_context if default_context else ""
+
+
 # Function to generate a contextually appropriate response
 def generate_response(comment, target_string_found):
-    # Use the Hugging Face model to generate a contextual response
-    return generate_contextual_response(comment.body, comment.subreddit.display_name)
+    # Get context specific to the subreddit
+    subreddit_context = get_context_for_subreddit(comment.subreddit.display_name)
+
+    # Use the Hugging Face model to generate a contextual response with additional context
+    return generate_contextual_response(comment.body, comment.subreddit.display_name, subreddit_context)
 
 # Function to process a single comment
 def process_single_comment(comment, comments_replied_to, subreddit_name):

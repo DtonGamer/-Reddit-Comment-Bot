@@ -330,6 +330,151 @@ def setup_hf_integration():
         print("  export HF_TOKEN=your_token_here")
         print("  export HF_MODEL=Qwen/Qwen2.5-7B-Instruct  # optional")
 
+
+def manage_context():
+    """Manage context files for the bot"""
+    print("\nContext Management")
+    print("="*20)
+    print("Available context files in the 'context' directory:")
+
+    import os
+    context_dir = "context"
+    if os.path.exists(context_dir):
+        files = [f for f in os.listdir(context_dir) if f.endswith('.md')]
+        if files:
+            for i, file in enumerate(files, 1):
+                print(f"{i}. {file}")
+        else:
+            print("No context files found.")
+    else:
+        print("Context directory not found.")
+
+    print("\nOptions:")
+    print("1. View a context file")
+    print("2. Create a new context file")
+    print("3. Edit an existing context file")
+    print("4. Go back")
+
+    choice = input("\nSelect an option (1-4): ")
+
+    if choice == "1":
+        view_context_file()
+    elif choice == "2":
+        create_context_file()
+    elif choice == "3":
+        edit_context_file()
+    elif choice == "4":
+        return
+    else:
+        print("Invalid choice")
+
+
+def view_context_file():
+    """View the contents of a context file"""
+    import os
+    context_dir = "context"
+    if os.path.exists(context_dir):
+        files = [f for f in os.listdir(context_dir) if f.endswith('.md')]
+        if not files:
+            print("No context files found.")
+            return
+
+        print("\nSelect a file to view:")
+        for i, file in enumerate(files, 1):
+            print(f"{i}. {file}")
+
+        try:
+            file_choice = int(input("Enter file number: ")) - 1
+            if 0 <= file_choice < len(files):
+                file_path = os.path.join(context_dir, files[file_choice])
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    print(f"\n--- Content of {files[file_choice]} ---")
+                    print(content)
+                    print("--- End of content ---")
+            else:
+                print("Invalid file number.")
+        except ValueError:
+            print("Please enter a valid number.")
+    else:
+        print("Context directory not found.")
+
+
+def create_context_file():
+    """Create a new context file"""
+    import os
+    context_dir = "context"
+    if not os.path.exists(context_dir):
+        os.makedirs(context_dir)
+
+    filename = input("Enter the filename (e.g., my_custom_context.md): ")
+    if not filename.endswith('.md'):
+        filename += '.md'
+
+    file_path = os.path.join(context_dir, filename)
+
+    print("Enter the context content (type 'END' on a new line to finish):")
+    lines = []
+    while True:
+        line = input()
+        if line.strip() == 'END':
+            break
+        lines.append(line)
+
+    content = '\n'.join(lines)
+
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    print(f"Context file {filename} created successfully!")
+
+
+def edit_context_file():
+    """Edit an existing context file"""
+    import os
+    context_dir = "context"
+    if os.path.exists(context_dir):
+        files = [f for f in os.listdir(context_dir) if f.endswith('.md')]
+        if not files:
+            print("No context files found.")
+            return
+
+        print("\nSelect a file to edit:")
+        for i, file in enumerate(files, 1):
+            print(f"{i}. {file}")
+
+        try:
+            file_choice = int(input("Enter file number: ")) - 1
+            if 0 <= file_choice < len(files):
+                file_path = os.path.join(context_dir, files[file_choice])
+
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                print(f"\nCurrent content of {files[file_choice]}:")
+                print(content)
+
+                print("\nEnter new content (type 'END' on a new line to finish):")
+                lines = []
+                while True:
+                    line = input()
+                    if line.strip() == 'END':
+                        break
+                    lines.append(line)
+
+                new_content = '\n'.join(lines)
+
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(new_content)
+
+                print(f"Context file {files[file_choice]} updated successfully!")
+            else:
+                print("Invalid file number.")
+        except ValueError:
+            print("Please enter a valid number.")
+    else:
+        print("Context directory not found.")
+
 def main_menu():
     """Display the main menu and handle user choices"""
     while True:
@@ -341,10 +486,11 @@ def main_menu():
         print("3. Modify behavior settings")
         print("4. View recent activity logs")
         print("5. Hugging Face integration setup")
-        print("6. Run the bot")
-        print("7. Exit")
+        print("6. Context management")
+        print("7. Run the bot")
+        print("8. Exit")
 
-        choice = input("\nSelect an option (1-7): ")
+        choice = input("\nSelect an option (1-8): ")
 
         if choice == "1":
             modify_target_subreddits()
@@ -357,15 +503,17 @@ def main_menu():
         elif choice == "5":
             setup_hf_integration()
         elif choice == "6":
+            manage_context()
+        elif choice == "7":
             print("Starting the bot...")
             import reddit_bot
             # Note: This won't actually start the bot in a loop here
             # It's just for demonstration purposes
-        elif choice == "7":
+        elif choice == "8":
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please select 1-7.")
+            print("Invalid choice. Please select 1-8.")
 
 if __name__ == "__main__":
     if load_config():

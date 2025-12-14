@@ -78,6 +78,14 @@ The bot includes sophisticated configuration options:
 - Time-based activity scheduling
 - Content moderation to avoid controversial topics
 - Session-limited engagement to follow Reddit guidelines
+- **Context Management**: Provide specific context for different destinations and topics to make responses more targeted and relevant
+
+### Context Management
+The bot can use specific context for different subreddits and topics:
+- Context files are stored in the `context/` directory
+- Different contexts are automatically applied based on the subreddit
+- You can create custom context files for specific destinations or topics
+- Context helps the AI generate more accurate and relevant responses
 
 See `config.py` and `advanced_config.py` for detailed settings.
 

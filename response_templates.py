@@ -157,7 +157,7 @@ SOLO_TRAVEL_RESPONSES = [
     "I specialize in visual planners that make solo travel more meaningful!"
 ]
 
-def generate_contextual_response(comment_text, subreddit_name):
+def generate_contextual_response(comment_text, subreddit_name, additional_context=None):
     """
     Generate a contextual response using Hugging Face model based on the comment and subreddit.
     """
@@ -165,20 +165,29 @@ def generate_contextual_response(comment_text, subreddit_name):
         # Fallback to rule-based responses if HF is not enabled
         return get_destination_specific_response(comment_text)
 
-    # Craft a prompt for the model based on the comment
-    prompt = f"""
+    # Base context for travel advice
+    base_context = f"""
     You are a helpful travel advisor named Travel Planning Enthusiast (username: crayontravel_helper).
     You create hand-drawn style travel journals and share travel planning tips.
-    A Reddit user in r/{subreddit_name} asked: "{comment_text}"
-
-    Provide helpful, friendly travel advice that addresses their question directly.
-    Keep responses concise but informative (2-3 paragraphs max).
-    At the end, naturally mention that you create crayon-style travel journals if relevant to their query,
-    but only if it fits naturally and adds value.
-    Use a friendly, knowledgeable tone.
-
-    Response:
     """
+
+    # Add additional context if provided
+    if additional_context:
+        base_context += f"\nAdditional Context: {additional_context}\n"
+
+    # Craft a prompt for the model based on the comment
+    prompt = f"""
+{base_context}
+A Reddit user in r/{subreddit_name} asked: "{comment_text}"
+
+Provide helpful, friendly travel advice that addresses their question directly.
+Keep responses concise but informative (2-3 paragraphs max).
+At the end, naturally mention that you create crayon-style travel journals if relevant to their query,
+but only if it fits naturally and adds value.
+Use a friendly, knowledgeable tone.
+
+Response:
+"""
 
     try:
         # Generate response using Hugging Face model
@@ -187,19 +196,51 @@ def generate_contextual_response(comment_text, subreddit_name):
             max_new_tokens=300,
             temperature=0.7,
             do_sample=True,
-            stop_sequences=["\n\n", "User:", "Comment:"]
+            stop_sequences=["\n\n", "User:", "Comment:", "A Reddit user"]
         )
 
         # Clean up the response
         # The response might contain the prompt, so we extract just the generated part
         if "Response:" in response:
             response = response.split("Response:")[-1].strip()
+        elif "A Reddit user" in response:
+            # If it echoed the prompt, take everything after
+            parts = response.split("A Reddit user")
+            if len(parts) > 1:
+                response = parts[0].strip()
 
         return response
     except Exception as e:
         print(f"Error generating response with Hugging Face: {e}")
         # Fallback to rule-based response
         return get_destination_specific_response(comment_text) or random.choice(GENERIC_RESPONSES)
+
+
+def load_context_from_file(file_path):
+    """
+    Load specific context from a file to be used in responses.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        print(f"Context file {file_path} not found.")
+        return None
+    except Exception as e:
+        print(f"Error reading context file: {e}")
+        return None
+
+
+def save_context_to_file(context, file_path):
+    """
+    Save context to a file for future use.
+    """
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(context)
+        print(f"Context saved to {file_path}")
+    except Exception as e:
+        print(f"Error saving context: {e}")
 
 
 def get_destination_specific_response(comment_text):
