@@ -20,10 +20,19 @@ Update the `config.py` file with your Reddit account details:
 - `REDDIT_PASSWORD`: Your Reddit account password
 - `REDDIT_CLIENT_ID`: Your Reddit app client ID (from Reddit App Preferences)
 - `REDDIT_CLIENT_SECRET`: Your Reddit app client secret
+- `REDDIT_USER_AGENT`: A unique identifier for your bot
 - `TARGET_SUBREDDITS`: List of subreddits to monitor (already configured)
 - `TARGET_STRINGS`: Keywords that trigger bot responses (already configured)
 - `REPLY_TEMPLATES`: Generic response starters (already configured)
 - `SLEEP_DURATION`: Time between scanning sessions (default: 60 seconds)
+
+**Using Environment Variables:**
+For security, it's recommended to use environment variables instead of editing config.py directly:
+
+1. Copy the `.env` template file to `.env.local`
+2. Fill in your credentials in the `.env.local` file
+3. The bot will automatically load these values
+4. The `.env` file is included in `.gitignore` to protect your credentials
 
 ## AI Integration Setup
 
