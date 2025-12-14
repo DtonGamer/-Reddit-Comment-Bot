@@ -41,3 +41,7 @@ This Reddit Comment Bot is a Python-based auto-responder.
 ```sh
 $ python reddit_bot.py
 ```
+
+### License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

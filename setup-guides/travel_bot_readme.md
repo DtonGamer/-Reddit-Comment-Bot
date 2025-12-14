@@ -77,3 +77,7 @@ The bot includes special handling for Tokyo and Paris queries. You can extend th
 - Adjust the target strings and reply templates to match your engagement strategy
 - Be mindful of rate limits when testing
 - Consider Reddit's terms of service and each subreddit's specific rules
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
